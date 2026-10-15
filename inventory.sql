@@ -68,3 +68,6 @@ create index if not exists work_order_files_actor_idx on public.work_order_files
 create index if not exists part_transactions_part_idx on public.part_transactions(part_id);
 create index if not exists part_transactions_actor_idx on public.part_transactions(created_by);
 create index if not exists van_stock_part_idx on public.van_stock(part_id);
+
+-- Optional service overview fields
+alter table public.jobs add column if not exists order_type text not null default 'Service', add column if not exists equipment_model text not null default '', add column if not exists asset_number text not null default '', add column if not exists unit_location text not null default '';
