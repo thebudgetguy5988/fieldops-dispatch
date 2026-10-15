@@ -1,6 +1,8 @@
-# FieldOps Dispatch — starter MVP
+# FieldOps Dispatch — starter MVP (deployment-ready files)
 
 A small, original field-service dispatch web app inspired by common FSM workflows: dispatcher job creation/assignment, technician job board, job status updates, and permission-based foreground GPS location sharing.
+
+> **Current project note:** The Supabase database for `fieldops-dispatch` has already been prepared (2026-10-15). See `DEPLOYMENT_STATUS.md` for the remaining GitHub/Vercel publishing steps. This repository is a prototype, not a production-ready workforce tracking system.
 
 ## Lowest-cost path
 
@@ -14,18 +16,16 @@ A small, original field-service dispatch web app inspired by common FSM workflow
 
 1. Install Node.js LTS from https://nodejs.org/.
 2. Create a Supabase project at https://supabase.com/.
-3. In Supabase, open **SQL Editor**, paste `supabase/schema.sql`, and run it.
+3. For **a new Supabase project only**, run `supabase/schema.sql` using the SQL Editor. The current `fieldops-dispatch` project has already had an equivalent migration applied. Do not rerun the full script in the active project unnecessarily.
 4. In Supabase **Authentication > Users**, create a user for yourself and each technician. For each user, copy the Auth user UUID.
-5. Add a profile row for each account in the SQL editor. Example (replace values):
+5. The auth trigger now creates a default `technician` profile for every new Auth account. For your first account, *verify its UUID* and promote it to `admin` from the SQL Editor. Example (replace values):
 
    ```sql
-   insert into public.profiles (id, full_name, email, role)
-   values
-     ('AUTH-UUID-FOR-YOU', 'Dispatcher Admin', 'you@example.com', 'admin'),
-     ('AUTH-UUID-FOR-TECH', 'Technician One', 'tech@example.com', 'technician');
+   update public.profiles set role = 'admin', full_name = 'Dispatcher Admin'
+   where id = 'VERIFIED-AUTH-UUID-FOR-YOUR-ACCOUNT';
    ```
 
-   For the first admin only, if the admin policy blocks you from managing profiles, insert profile rows through the SQL Editor as the database owner. Never give technicians the service-role key.
+   Do this only for a known, verified account through the SQL Editor as the database owner. Never give users the service-role key.
 6. Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Supabase project settings/API keys; use the publishable/anon client key, never the service-role secret).
 7. In a terminal inside this folder, run:
 
@@ -46,9 +46,9 @@ A small, original field-service dispatch web app inspired by common FSM workflow
 
 ## Important limitations / production checklist
 
-- GPS sharing starts only when a technician taps **Start sharing location**, the board stays open, and the browser grants location permission. It stops when the user stops sharing or the page closes. Browser GPS may be throttled in the background. Do not describe this as continuous background tracking.
+- GPS sharing starts only when a technician taps **Start sharing location**, the board stays open, and the browser grants location permission. New location updates stop when the page closes; a previously saved position can remain until the technician explicitly stops sharing or an appropriate retention cleanup runs. Browser GPS may be throttled in the background. Do not describe this as continuous background tracking.
 - For background GPS, build a native app (e.g. React Native + Expo Location) and explicitly request the correct iOS/Android permissions. Test on physical phones; OSes may suspend or stop tracking. Make location collection visible and documented in your company policy.
-- The app's UI uses status controls for all roles; RLS restricts technicians to assigned jobs, but the current policy allows a technician to update any fields on their assigned job through the client. Before production, add a database trigger or RPC so technicians can change **only** status/allowed notes, not reschedule or reassign work.
+- The database includes a trigger that allows technicians to change only the status and update timestamp of their assigned jobs. Test role permissions thoroughly before production.
 - Review and test every Row Level Security policy, add audit history, password reset, notifications, data retention, backups, error monitoring, and user deactivation before real company use.
 - Enable/verify Realtime table publication if the SQL script reports that the table is already in the publication.
 - Never use a Supabase service-role key in frontend code.
