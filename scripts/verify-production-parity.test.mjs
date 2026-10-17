@@ -9,7 +9,7 @@ const script = resolve(import.meta.dirname, 'verify-production-parity.mjs');
 const required = [
   'src/App.jsx', 'src/Inventory.jsx', 'src/Schedule.jsx',
   'src/WorkOrder.jsx', 'src/Organization.jsx',
-  'src/organization.css', 'public/via-lock-logo.webp',
+  'src/organization.css', 'public/via-lock-logo.svg',
 ];
 
 function fixture() {
@@ -43,7 +43,7 @@ test('missing organization module blocks release', () => {
 test('empty logo blocks release', () => {
   const dir = fixture();
   try {
-    writeFileSync(join(dir, 'public/via-lock-logo.webp'), '');
+    writeFileSync(join(dir, 'public/via-lock-logo.svg'), '');
     const result = spawnSync(process.execPath, [script], { cwd: dir, encoding: 'utf8' });
     assert.equal(result.status, 1);
     assert.match(result.stderr, /public\\/via-lock-logo\\.webp/);
