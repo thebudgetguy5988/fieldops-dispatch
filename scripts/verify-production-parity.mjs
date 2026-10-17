@@ -10,7 +10,7 @@ const required = [
   'src/WorkOrder.jsx',
   'src/Organization.jsx',
   'src/organization.css',
-  'public/via-lock-logo.webp',
+  'public/via-lock-logo.svg',
 ];
 
 const missing = required.filter((path) => {
