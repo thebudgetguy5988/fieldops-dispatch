@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { supabase } from './supabase';
+import { supabase, getPublicAuthSettings } from './supabase';
 import Inventory from './Inventory';
 import Organization from './Organization';
 import WorkOrder from './WorkOrder';
@@ -15,10 +15,15 @@ const fmt = value => value ? new Date(value).toLocaleString() : 'Not scheduled';
 export default function App(){
   const [openJob,setOpenJob]=useState(null),[showCreate,setShowCreate]=useState(false),[search,setSearch]=useState('');
   const [session,setSession]=useState(null), [profile,setProfile]=useState(null), [email,setEmail]=useState(''), [password,setPassword]=useState('');
-  const [authMode,setAuthMode]=useState('signin'),[fullName,setFullName]=useState('');
+  const [authMode,setAuthMode]=useState('signin'),[fullName,setFullName]=useState(''),[githubEnabled,setGithubEnabled]=useState(false);
   const [jobs,setJobs]=useState([]), [techs,setTechs]=useState([]), [locations,setLocations]=useState([]), [job,setJob]=useState(emptyJob), [error,setError]=useState(''), [notice,setNotice]=useState(''), [tab,setTab]=useState('schedule'), [loading,setLoading]=useState(false), [tracking,setTracking]=useState(false);
 
-  useEffect(()=>{ if(!supabase)return; supabase.auth.getSession().then(({data})=>setSession(data.session)); const {data:{subscription}}=supabase.auth.onAuthStateChange((event,s)=>{setSession(s);if(event==='PASSWORD_RECOVERY')setAuthMode('reset');}); return ()=>subscription.unsubscribe(); },[]);
+  useEffect(()=>{
+    let active=true;
+    getPublicAuthSettings().then(settings=>{if(active)setGithubEnabled(settings?.external?.github===true);}).catch(()=>{});
+    return()=>{active=false;};
+  },[]);
+  useEffect(()=>{ if(!supabase)return; supabase.auth.getSession().then(({data,error})=>{setSession(data.session);if(error)setError('Unable to complete sign-in. Please try again.');}); const {data:{subscription}}=supabase.auth.onAuthStateChange((event,s)=>{setSession(s);if(event==='PASSWORD_RECOVERY')setAuthMode('reset');}); return ()=>subscription.unsubscribe(); },[]);
   useEffect(()=>{
     let active=true;
     setProfile(null);setJobs([]);setTechs([]);setLocations([]);setOpenJob(null);setTracking(false);
@@ -38,8 +43,15 @@ export default function App(){
   },[profile]);
   useEffect(()=>{loadData(); if(!supabase||!profile)return; const channel=supabase.channel('fieldops-live').on('postgres_changes',{event:'*',schema:'public',table:'jobs'},loadData).on('postgres_changes',{event:'*',schema:'public',table:'technician_locations'},loadData).subscribe(); const timer=setInterval(loadData,30000); return()=>{supabase.removeChannel(channel);clearInterval(timer);};},[loadData,profile]);
 
+  async function signInWithGithub(){
+    setError('');setNotice('');setLoading(true);
+    try{
+      const {error}=await supabase.auth.signInWithOAuth({provider:'github',options:{redirectTo:window.location.origin,scopes:'user:email'}});
+      if(error)throw error;
+    }catch(err){setError(err.message||'GitHub sign-in could not start. Please try again.');}finally{setLoading(false);}
+  }
   async function authenticate(e){
-    e.preventDefault();setError('');setNotice('');setLoading(true);
+    e.preventDefault();if(authMode==='signup'&&githubEnabled)return signInWithGithub();setError('');setNotice('');setLoading(true);
     try{
       let result;
       if(authMode==='signup'){
@@ -78,7 +90,30 @@ export default function App(){
 
   const myJobs=useMemo(()=>profile?.role==='technician'?jobs.filter(j=>j.assigned_to===session?.user?.id):jobs,[jobs,profile,session]);
   if(!supabase)return <main className="center"><section className="panel setup"><img className="logo" src="/via-lock-logo.svg" alt="Via Lock"/><h1>Via Lock</h1><p>Connect your free Supabase project to start the app.</p><ol><li>Copy <code>.env.example</code> to <code>.env</code>.</li><li>Paste your Supabase project URL and publishable/anon key.</li><li>Run the SQL in <code>supabase/schema.sql</code>.</li><li>Restart the development server.</li></ol><p className="muted">Setup instructions are in README.md.</p></section></main>;
-  if(!session||authMode==='reset')return <main className="center"><form className="panel login" onSubmit={authenticate}><img className="logo" src="/via-lock-logo.svg" alt="Via Lock"/><h1>Via Lock</h1><p className="muted">{authMode==='signup'?'Create your service workspace account':authMode==='forgot'?'Reset your password':authMode==='reset'?'Choose a new password':'Sign in to your service board'}</p>{authMode==='signup'&&<label>Full name<input type="text" required maxLength="200" value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name"/></label>}{authMode!=='reset'&&<label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"/></label>}{authMode!=='forgot'&&<label>Password<input type="password" minLength={authMode==='signin'?6:12} required value={password} onChange={e=>setPassword(e.target.value)} autoComplete={authMode==='signin'?'current-password':'new-password'}/>{authMode!=='signin'&&<small>Use at least 12 characters and a unique password.</small>}</label>}<button disabled={loading}>{loading?'Please wait…':authMode==='signup'?'Create account':authMode==='forgot'?'Send reset link':authMode==='reset'?'Save new password':'Sign in'}</button><button className="secondary" type="button" onClick={()=>{setAuthMode(authMode==='signin'?'signup':'signin');setError('');setNotice('');}}>{authMode==='signin'?'New here? Sign up':'Back to sign in'}</button>{authMode==='signin'&&<button type="button" className="secondary" onClick={()=>{setAuthMode('forgot');setError('');setNotice('');}}>Forgot password?</button>}{error&&<p className="error" role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}<p className="creatorCredit">Created by: Misael Jimenez</p></form></main>;
+  if(!session||authMode==='reset'){
+    const socialSignup=githubEnabled&&authMode==='signup';
+    return <main className="center"><form className="panel login" onSubmit={authenticate}>
+      <img className="logo" src="/via-lock-logo.svg" alt="Via Lock"/><h1>Via Lock</h1>
+      <p className="muted">{authMode==='signup'?'Create your service workspace account':authMode==='forgot'?'Reset your password':authMode==='reset'?'Choose a new password':'Sign in to your service board'}</p>
+      {githubEnabled&&['signin','signup'].includes(authMode)&&<>
+        <button type="button" className="githubSignIn" disabled={loading} onClick={signInWithGithub}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 .8a11.2 11.2 0 0 0-3.54 21.82c.56.1.77-.24.77-.54v-2.08c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.62 1.22 3.26.94.1-.73.39-1.22.71-1.5-2.5-.28-5.13-1.25-5.13-5.57 0-1.23.44-2.23 1.16-3.01-.12-.29-.5-1.43.11-2.98 0 0 .94-.3 3.08 1.15a10.7 10.7 0 0 1 5.61 0c2.14-1.45 3.08-1.15 3.08-1.15.61 1.55.23 2.69.11 2.98.72.78 1.15 1.78 1.15 3.01 0 4.33-2.63 5.28-5.14 5.56.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .8Z"/></svg>
+          {loading?'Please wait…':'Continue with GitHub'}
+        </button>
+        {socialSignup?<p className="muted small">Use your GitHub account to verify your identity and create your organization. Team members can join with an invitation.</p>:<div className="authDivider"><span>or sign in with email</span></div>}
+      </>}
+      {!socialSignup&&<>
+        {authMode==='signup'&&<label>Full name<input type="text" required maxLength="200" value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name"/></label>}
+        {authMode!=='reset'&&<label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"/></label>}
+        {authMode!=='forgot'&&<label>Password<input type="password" minLength={authMode==='signin'?6:12} required value={password} onChange={e=>setPassword(e.target.value)} autoComplete={authMode==='signin'?'current-password':'new-password'}/>{authMode!=='signin'&&<small>Use at least 12 characters and a unique password.</small>}</label>}
+        <button disabled={loading}>{loading?'Please wait…':authMode==='signup'?'Create account':authMode==='forgot'?'Send reset link':authMode==='reset'?'Save new password':'Sign in'}</button>
+      </>}
+      <button className="secondary" type="button" onClick={()=>{setAuthMode(authMode==='signin'?'signup':'signin');setError('');setNotice('');}}>{authMode==='signin'?'New here? Sign up':'Back to sign in'}</button>
+      {authMode==='signin'&&<button type="button" className="secondary" onClick={()=>{setAuthMode('forgot');setError('');setNotice('');}}>Forgot password?</button>}
+      {error&&<p className="error" role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
+      <p className="creatorCredit">Created by: Misael Jimenez</p>
+    </form></main>;
+  }
   if(!profile)return <main className="center"><section className="panel"><h2>Loading your profile…</h2>{error&&<p className="error">{error}</p>}<button className="secondary" onClick={signOut}>Sign out</button></section></main>;
   if(!profile.organization_id)return <div className="app"><header className="topbar"><div className="brand"><img className="logo smallLogo" src="/via-lock-logo.svg" alt="Via Lock"/><div><b>Via Lock</b><span>Organization setup</span></div></div><button className="secondary compact" onClick={signOut}>Sign out</button></header><Organization profile={profile} onChanged={async()=>{const {data,error}=await supabase.from('profiles').select('*').eq('id',session.user.id).single();if(error)setError(error.message);else setProfile(data);}}/></div>;
   const canDispatch=['admin','dispatcher'].includes(profile.role);
