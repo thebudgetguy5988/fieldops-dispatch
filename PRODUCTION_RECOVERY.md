@@ -27,9 +27,13 @@ All disposable test accounts, organizations, inventory, appointments, evidence i
 
 The Supabase dashboard now enforces a minimum password length of 12, verified by a live API rejection of an under-length password. The Site URL and allowed authentication callbacks now include https://vialock.vercel.app/. Email confirmation remains enabled.
 
-## Remaining public-launch requirements
+## Public GitHub launch: October 18, 2026
 
-1. **Configure transactional email.** Custom SMTP is disabled. Supabase's default SMTP only delivers to project-team email addresses, so outside customers cannot complete email confirmation or password recovery. A configured email provider and verified sending identity are required.
+Public signup now uses the approved Via Lock GitHub OAuth application. The provider is enabled and a real browser login linked the owner to the existing verified administrator account and organization. The interface directs new users to GitHub and preserves existing email sign-in. See GITHUB_PUBLIC_LAUNCH.md for configuration and verification limits. First-time signup with a second external GitHub account has not been exercised.
+
+## Email authentication and optional plan follow-up
+
+1. **Configure transactional email for general email authentication.** Custom SMTP is disabled. Supabase's default SMTP only delivers to project-team email addresses, so outside customers cannot complete email confirmation or password recovery. A configured email provider and verified sending identity are required.
 2. **Enable leaked-password protection on a supported plan.** The organization is on Supabase Free. The dashboard identifies this feature as Pro and above, and an attempted enable did not persist. No paid plan change was made.
 
 The final security advisor scan reported this one password-protection warning and two informational legacy deny-by-default tables, with no privileged-function warnings.
