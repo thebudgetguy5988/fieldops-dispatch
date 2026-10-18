@@ -18,12 +18,12 @@ export default function Organization({profile,onChanged}){
  useEffect(()=>{load()},[profile?.organization_id,profile?.role]);
  async function execute(call,success){
   B(true);X('');S('');
-  try{const {data,error}=await call();if(error)throw error;S(success);await load();onChanged?.();return data}
+  try{const {data,error}=await call();if(error)throw error;S(success);await onChanged?.();await load();return data}
   catch(e){X(e.message||'Request failed');return null}finally{B(false)}
  }
- async function create(e){e.preventDefault();await execute(()=>supabase.rpc('create_organization',{p_name:name.trim()}),'Organization created. Sign out and back in to refresh your profile.')}
+ async function create(e){e.preventDefault();await execute(()=>supabase.rpc('create_organization',{p_name:name.trim()}),'Organization created. Your workspace is ready.')}
  async function invite(e){e.preventDefault();const result=await execute(()=>supabase.rpc('create_employee_invite',{p_email:email.trim(),p_role:role}),'Invitation generated. Share the token securely.');if(result)T(result)}
- async function accept(e){e.preventDefault();await execute(()=>supabase.rpc('accept_employee_invite',{p_token:join.trim()}),'Invitation accepted. Sign out and back in to refresh your profile.')}
+ async function accept(e){e.preventDefault();await execute(()=>supabase.rpc('accept_employee_invite',{p_token:join.trim()}),'Invitation accepted. Your workspace is ready.')}
  async function change(member,next){if(!window.confirm('Change this employee role?'))return;await execute(()=>supabase.rpc('change_employee_role',{p_user:member.id,p_role:next}),'Employee role updated.')}
  async function revoke(id){if(!window.confirm('Revoke this invitation?'))return;await execute(()=>supabase.rpc('revoke_employee_invite',{p_id:id}),'Invitation revoked.')}
  return <main className="content organizationPage"><section className="panel"><h1>{org?.name||'Organization'}</h1>

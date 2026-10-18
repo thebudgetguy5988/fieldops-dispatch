@@ -1,21 +1,24 @@
-# Via Lock production recovery
+# Via Lock release status
 
-**Do not deploy this branch or `main` to production yet.** The current GitHub source is older than the live Vercel deployment and lacks production features. The deployed Vercel project is `fieldops-dispatch` (`prj_R1kh3VQyQWwUpmLm2hjw6T5yoMcp`) at https://vialock.vercel.app. Production deployment inspected: `dpl_CmYDigXth7i12mHwfeuNA4fD6PZc`.
+The application source has been recovered onto `vialock-safe-recovery-20261015` and compared against the currently deployed ancestor. Organization management, scheduling, inventory, work-order photos and signatures, the logo, and analytics are present.
 
-## Production file inventory
+## October 18 launch fixes
 
-Vercel deployment source root is `src/` with `index.html`, `package.json`, `package-lock.json`, `vercel.json`, `public/via-lock-logo.webp`, and `src/{App.jsx,Icon.jsx,Inventory.jsx,Organization.jsx,Schedule.jsx,WorkOrder.jsx,main.jsx,organization.css,style.css,supabase.js}`. In particular, `Organization.jsx` and the Via Lock logo exist in the deployed source but may be missing from GitHub.
+- Correct employee invitation email validation and refresh organization membership immediately.
+- Keep privileged organization implementations in the private schema, with invoker API wrappers and server-side authorization.
+- Allow technicians to read their own location so repeated location upserts succeed.
+- Serialize inventory operation retries before checking or changing stock.
+- Serialize administrator role changes to preserve the last administrator.
+- Add password recovery and appointment rescheduling/duration controls.
+- Load analytics once on the complete application, including sign-in.
+- Repair and run the production-file guard tests in CI.
 
-## Recovery checklist
+## Verification
 
-- [ ] Recover full contents and binary assets from a trusted production source or backup; Vercel file-content connector currently truncates large responses.
-- [ ] Diff against GitHub without removing any production-only files or functionality.
-- [ ] Verify Supabase publishable key only is included in browser code; never commit secrets.
-- [ ] Test sign-in, organization creation and invites, role restrictions, scheduling, work orders, parts transactions, photos/signatures, and mobile workflows.
-- [ ] Test cross-organization isolation and concurrent scheduling updates.
-- [ ] Build and test a preview deployment; promote only after passing tests.
-- [ ] Keep messaging out of scope per product owner's request.
+Run `npm test` and `npm run build`. `scripts/test-live-api.py` performs authenticated API tests using isolated, pre-provisioned administrator, technician, and second-organization accounts. Pass its private configuration path as the only argument. Never commit account configuration, passwords, tokens, or customer evidence. Tests include scheduling conflicts, role restrictions, cross-organization isolation, stock retry/concurrency, location updates, and evidence storage. The harness does not replace browser end-to-end testing or validate email delivery.
 
-## Database work already verified
+## Remaining launch setting
 
-The `jobs_active_technician_schedule_idx` partial index exists on `(organization_id, assigned_to, scheduled_at)` for scheduled active assignments. A previous migration corrected work-order evidence organization matching. Neither change replaces application-level scheduling conflict checks.
+Supabase leaked-password protection remains disabled. The connected Supabase tools cannot change Auth configuration; the dashboard requires a fresh authenticated session. Confirm this setting is enabled before describing the security checklist as fully complete.
+
+Messaging remains outside this release scope. Legacy `technicians` and `work_orders` tables are deliberately deny-by-default with RLS and no client policies; the app uses `profiles` and `jobs`.

@@ -36,7 +36,7 @@ test('missing organization module blocks release', () => {
     rmSync(join(dir, 'src/Organization.jsx'));
     const result = spawnSync(process.execPath, [script], { cwd: dir, encoding: 'utf8' });
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /src\\/Organization\\.jsx/);
+    assert.ok(result.stderr.includes('src/Organization.jsx'));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -46,6 +46,6 @@ test('empty logo blocks release', () => {
     writeFileSync(join(dir, 'public/via-lock-logo.svg'), '');
     const result = spawnSync(process.execPath, [script], { cwd: dir, encoding: 'utf8' });
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /public\\/via-lock-logo\\.webp/);
+    assert.ok(result.stderr.includes('public/via-lock-logo.svg'));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
