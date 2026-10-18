@@ -10,3 +10,5 @@
 .partLine{display:flex;gap:16px;align-items:flex-start}.partLine .lineIcon{color:#0872ce;background:#edf6ff;padding:10px;border-radius:9px}.partLine p{margin:7px 0;font-size:14px}.partLine small{color:#71838b}.partsLineList:empty:after{content:"No parts recorded for this work order.";display:block;padding:24px 0;color:#71838b;font-size:14px}
 
 .githubSignIn{display:flex;align-items:center;justify-content:center;gap:10px;background:#24292f;color:white;width:100%;border:1px solid #24292f}.githubSignIn:hover{background:#32383f}.authDivider{display:flex;align-items:center;gap:12px;color:#6b7280;font-size:12px;margin:4px 0}.authDivider:before,.authDivider:after{content:"";height:1px;background:#e5e7eb;flex:1}
+
+.googleSignIn{display:flex;align-items:center;justify-content:center;gap:10px;background:white;color:#1f2937;width:100%;border:1px solid #cbd5e1}.googleSignIn:hover{background:#f8fafc}.googleSignIn:focus-visible,.githubSignIn:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
