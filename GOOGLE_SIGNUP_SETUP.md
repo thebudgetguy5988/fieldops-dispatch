@@ -4,7 +4,9 @@ The app supports Continue with Google on both sign-in and signup screens, alongs
 
 ## Activation status (October 18, 2026)
 
-App implementation is ready for deployment. Google authentication is not activated: Google Cloud Console returned Site Unavailable in this browser, including one reload. No suitable connected OAuth administration plugin was found. A Google OAuth web client must be registered before the Supabase provider can be enabled.
+Application support is deployed at commit 062d5be. The owner registered the Google OAuth web client, and its client ID and secret were saved in the Supabase Google provider configuration. Google is enabled, confirmed by the public Auth settings endpoint. The live app displays Continue with Google alongside GitHub. The secret is not stored in the repository or frontend.
+
+Google Cloud Console remained unavailable in the agent browser; the owner completed client registration separately. The Google audience publishing state has not been independently inspected.
 
 ## Exact provider setup
 
@@ -16,6 +18,8 @@ App implementation is ready for deployment. Google authentication is not activat
 
 ## Verification
 
-Seven local smoke/guard tests and the production build passed. Actual Google OAuth login and first-time Google registration remain unverified until the client exists and the provider is enabled. GitHub signup remains available.
+Seven local smoke/guard tests, SDK OAuth redirect checks, the production build and CI passed. The live Google button successfully reaches Google account selection with the registered client ID and expected callback. The owner selected the existing Google account through secure browser authentication. Google then required passkey verification; the complete token exchange, return to Via Lock, account linking and first-time Google registration remain pending that identity check. GitHub signup remains enabled.
+
+Public client ID: 563071721965-3tjf728ubub948oqa1qtcct310sb4cm1.apps.googleusercontent.com
 
 Official instructions: https://supabase.com/docs/guides/auth/social-login/auth-google
