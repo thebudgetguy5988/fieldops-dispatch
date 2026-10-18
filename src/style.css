@@ -12,3 +12,51 @@
 .githubSignIn{display:flex;align-items:center;justify-content:center;gap:10px;background:#24292f;color:white;width:100%;border:1px solid #24292f}.githubSignIn:hover{background:#32383f}.authDivider{display:flex;align-items:center;gap:12px;color:#6b7280;font-size:12px;margin:4px 0}.authDivider:before,.authDivider:after{content:"";height:1px;background:#e5e7eb;flex:1}
 
 .googleSignIn{display:flex;align-items:center;justify-content:center;gap:10px;background:white;color:#1f2937;width:100%;border:1px solid #cbd5e1}.googleSignIn:hover{background:#f8fafc}.googleSignIn:focus-visible,.githubSignIn:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+
+
+/* Customer public request portal */
+.customerPublic{min-height:100vh;background:linear-gradient(160deg,#e9f0fc,#f8fafe 45%,#eef4ff);padding:0 14px 24px}
+.customerPublicHeader{display:flex;align-items:center;justify-content:center;gap:12px;padding:28px 0 24px;color:#152745}
+.customerPublicHeader span{display:flex;flex-direction:column;gap:2px;font-size:22px}.customerPublicHeader small{font-size:12px;color:#526581;font-weight:500}
+.customerFormPanel{background:#fff;border:1px solid #dde7f3;border-radius:22px;box-shadow:0 14px 45px #1c345218;width:min(100%,680px);margin:0 auto;padding:30px}
+.customerFormPanel h1{font-size:29px;margin:8px 0 10px}.customerFormPanel>p{line-height:1.55}.customerRequestForm{display:grid;gap:14px;margin-top:25px}
+.customerRequestForm h2{font-size:17px;margin:17px 0 0;border-top:1px solid #e5ecf6;padding-top:22px}
+.customerRequestForm h2:first-child{margin-top:0;border-top:0;padding-top:0}
+.customerRequestForm label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:750}
+.customerRequestForm label span{color:#de3b40}
+.customerRequestForm input,.customerRequestForm select,.customerRequestForm textarea{width:100%;min-width:0;border:1px solid #cbd8e9;background:#fbfdff;color:#172033;border-radius:11px;padding:12px 13px;outline:none;font-weight:450}
+.customerRequestForm :is(input,select,textarea):focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}
+.customerRequestForm p{margin:0;line-height:1.5}
+.customerFormGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.customerSubmit{padding:16px;font-size:15px;border-radius:11px}
+.customerTrap{position:absolute!important;left:-99999px;top:auto;width:1px;height:1px;overflow:hidden}
+.customerSuccess{text-align:center;padding:54px 30px}
+.customerSuccessIcon{background:#e3fbed;color:#168244;width:56px;height:56px;display:grid;place-items:center;border-radius:50%;font-size:30px;margin:0 auto 18px}
+.customerConfirmation{border:1px dashed #abc3e4;border-radius:12px;background:#f7faff;padding:18px;margin:28px auto;display:grid;gap:8px;width:fit-content;min-width:210px;font-size:12px;color:#64748b}
+.customerConfirmation strong{font-size:20px;letter-spacing:1px;color:#183660}
+.customerPublic footer{margin-top:15px}
+.requestInbox .pageTitle p{margin:8px 0 0}
+.requestQrPanel{display:grid;grid-template-columns:minmax(0,1fr) 230px;align-items:center;gap:28px}
+.requestQrInfo h2{font-size:23px;max-width:480px;margin:12px 0}
+.requestQrInfo p{line-height:1.55;max-width:550px}
+.requestLinkLabel{display:grid;gap:9px;font-size:12px;font-weight:700;margin:20px 0}
+.requestLinkLabel input{width:100%;padding:12px;border:1px solid #d6e0ed;border-radius:9px;color:#43536b;background:#f8fafc;font-size:12px}
+.requestQrArtwork{background:#fff;border:2px solid #132c50;border-radius:14px;padding:10px 10px 18px;text-align:center;display:grid;gap:4px;box-shadow:0 8px 15px #152b4212}
+.requestQrArtwork img{width:100%;height:auto;display:block;aspect-ratio:1}
+.requestQrArtwork b{font-size:12px;letter-spacing:1px;color:#17345a}
+.requestQrArtwork small{font-size:11px;color:#65768e}
+.requestPrintLink{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:10px 13px;text-decoration:none;font-size:13px;font-weight:700}
+.requestFilterBar{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 20px}
+.requestFilterBar button{font-size:12px;padding:9px 12px}
+.requestRows{display:grid;gap:12px}
+.requestRow{border:1px solid #e2e8f0;background:#fff;border-radius:13px;padding:19px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.requestRow h3{font-size:18px;margin:8px 0}.requestRow b{display:block;font-size:13px;margin:4px 0}
+.requestRow p{font-size:13px;line-height:1.45;margin:7px 0;overflow-wrap:anywhere}
+.requestRow a{font-size:12px;margin-right:14px;color:#1d4ed8;display:inline-block}
+.requestRowActions{display:grid;gap:10px;min-width:165px}
+.requestRowActions .status{width:fit-content}
+.status.new-request{color:#9a3412;background:#ffedd5}
+.status.ready-to-schedule{color:#1d4ed8;background:#dbeafe}
+.requestInbox .actionRow{display:flex;gap:9px;flex-wrap:wrap}
+.requestInbox .actionRow button{display:inline-flex;gap:7px;align-items:center}
+@media(max-width:720px){.customerFormPanel{padding:23px 16px}.customerFormGrid{grid-template-columns:1fr}.customerFormPanel h1{font-size:25px}.requestQrPanel{grid-template-columns:1fr}.requestQrArtwork{width:min(260px,100%);margin:0 auto}.requestRow{flex-direction:column}.requestRowActions{width:100%;display:flex;flex-wrap:wrap;align-items:center}.requestRowActions button{flex:1}.requestInbox .pageTitle{flex-direction:column;align-items:flex-start}}
